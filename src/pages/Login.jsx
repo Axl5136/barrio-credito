@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState('tiendita'); // 'productor' o 'tiendita'
+    const [role, setRole] = useState('tiendita');
     const [isSignUp, setIsSignUp] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -32,7 +32,7 @@ export default function Login() {
                 setError(error.message);
                 setLoading(false);
             } else {
-                const userRole = data.user?.user_metadata?.role;
+                const userRole = data.user?.user_metadata?.rol;
                 navigate(userRole === 'productor' ? '/productor' : '/tiendita');
             }
         }

@@ -1,13 +1,11 @@
 import { useAuth } from '../AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 export default function TienditaDashboard() {
     const { user, signOut } = useAuth();
-    const navigate = useNavigate();
 
     const handleSignOut = async () => {
         await signOut();
-        navigate('/login');
+        // El ProtectedRoute redirigirá automáticamente cuando detecte que no hay usuario
     };
 
     return (

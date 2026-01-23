@@ -1,7 +1,7 @@
 import { AuthProvider } from './AuthContext';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-import Login from './pages/login';
+import Login from './pages/Login';
 import ProductorDashboard from './pages/ProductorDashboard';
 import TienditaDashboard from './pages/TienditaDashboard';
 
@@ -9,15 +9,22 @@ function ProtectedRoute({ children, allowedRoles }) {
   const { user, userRole, loading } = useAuth();
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!user) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(userRole)) {
-    return <Navigate to={userRole === 'productor' ? '/productor' : '/tiendita'} />;
+    return <Navigate to={userRole === 'productor' ? '/productor' : '/tiendita'} replace />;
   }
 
   return children;
@@ -27,11 +34,18 @@ function PublicRoute({ children }) {
   const { user, userRole, loading } = useAuth();
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando...</p>
+        </div>
+      </div>
+    );
   }
 
   if (user) {
-    return <Navigate to={userRole === 'productor' ? '/productor' : '/tiendita'} />;
+    return <Navigate to={userRole === 'productor' ? '/productor' : '/tiendita'} replace />;
   }
 
   return children;

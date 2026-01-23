@@ -2,104 +2,102 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from './services/supabase';
 
 const AuthContext = createContext({});
-
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [userRole, setUserRole] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    const fetchUserRole = async (user) => {
+        if (!user) return null;
+
+        if (user.user_metadata?.rol) {
+            return user.user_metadata.rol;
+        }
+
+        const { data, error } = await supabase
+            .from('perfiles')
+            .select('rol')
+            .eq('id', user.id)
+            .single();
+
+        if (error) return null;
+        return data?.rol ?? null;
+    };
+
+    const applySession = async (session) => {
+        if (!session?.user) {
+            setUser(null);
+            setUserRole(null);
+            setLoading(false);
+            return;
+        }
+
+        setUser(session.user);
+        const role = await fetchUserRole(session.user);
+        setUserRole(role);
+        setLoading(false);
+    };
 
     useEffect(() => {
-        // Obtener sesión actual y rol desde la BD
-        const fetchUserRole = async (userId) => {
-            const { data, error } = await supabase
-                .from('perfiles')
-                .select('rol')
-                .eq('id', userId)
-                .single();
+        let mounted = true;
 
-            if (error) {
-                console.warn('Perfil no encontrado, cerrando sesión');
-                await supabase.auth.signOut();
-                return null;
-            }
-
-            return data?.rol ?? null;
+        const init = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (mounted) await applySession(session);
         };
 
-        supabase.auth.getSession().then(async ({ data: { session } }) => {
-            setUser(session?.user ?? null);
+        init();
 
-            if (session?.user) {
-                const role = await fetchUserRole(session.user.id);
-                setUserRole(role);
-            }
+        const { data: { subscription } } =
+            supabase.auth.onAuthStateChange(async (_, session) => {
+                if (!mounted) return;
+                setLoading(true);
+                await applySession(session);
+            });
 
-            setLoading(false);
-        });
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (_, session) => {
-                setUser(session?.user ?? null);
-
-                if (session?.user) {
-                    const rol = await fetchUserRole(session.user.id);
-                    setUserRole(rol);
-                } else {
-                    setUserRole(null);
-                }
-
-                setLoading(false);
-            }
-        );
-        return () => subscription.unsubscribe();
+        return () => {
+            mounted = false;
+            subscription.unsubscribe();
+        };
     }, []);
 
-    const signUp = async (email, password, rol) => {
-        const { data, error } = await supabase.auth.signUp({
+    const signUp = (email, password, rol) =>
+        supabase.auth.signUp({
             email,
             password,
-            options: {
-                data: {
-                    rol: rol
-                }
-            }
+            options: { data: { rol } }
         });
-        return { data, error };
-    };
 
-    const signIn = async (email, password) => {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        return { data, error };
-    };
+    const signIn = (email, password) =>
+        supabase.auth.signInWithPassword({ email, password });
 
     const signOut = async () => {
-        const { error } = await supabase.auth.signOut();
-        return { error };
+        setUser(null);
+        setUserRole(null);
+        await supabase.auth.signOut();
     };
 
-    // Obtener perfil de usuario
-    const getUserProfile = async (userId) => {
-        const { data, error } = await supabase
+    const getUserProfile = (userId) =>
+        supabase
             .from('perfiles')
             .select('*')
             .eq('id', userId)
             .single();
 
-        return { data, error };
-    };
-
     return (
-        <AuthContext.Provider value={{
-            user,
-            userRole,
-            loading,
-            signUp,
-            signIn,
-            signOut,
-            getUserProfile
-        }}>
+        <AuthContext.Provider
+            value={{
+                user,
+                userRole,
+                loading,
+                signUp,
+                signIn,
+                signOut,
+                getUserProfile
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );

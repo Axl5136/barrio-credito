@@ -1,14 +1,10 @@
 import { useAuth } from '../AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '../services/supabase';
 
 export default function ProductorDashboard() {
     const { user, signOut } = useAuth();
-    const navigate = useNavigate();
 
     const handleSignOut = async () => {
         await signOut();
-        navigate('/login');
     };
 
     return (
