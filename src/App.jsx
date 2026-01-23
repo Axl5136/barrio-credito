@@ -1,21 +1,41 @@
-import { useEffect, useState } from 'react'
-import { supabase } from './services/supabase'
+import { AuthProvider } from './AuthContext';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './AuthContext';
+import Login from './pages/login';
+import Home from './pages/home';
 
-function App() {
-  const [mensaje, setMensaje] = useState('Esperando conexión...')
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    console.log("Probando conexión a:", import.meta.env.VITE_SUPABASE_URL)
-    if (supabase) {
-      setMensaje('¡Conexión Exitosa con Supabase! 🚀')
-    }
-  }, [])
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
+  }
 
-  return (
-    <div className="flex h-screen items-center justify-center bg-gray-900 text-white">
-      <h1 className="text-4xl font-bold">{mensaje}</h1>
-    </div>
-  )
+  return user ? children : <Navigate to="/login" />;
 }
 
-export default App
+function PublicRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
+  }
+
+  return user ? <Navigate to="/home" /> : children;
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/" element={<Navigate to="/home" />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
+
+export default App;
