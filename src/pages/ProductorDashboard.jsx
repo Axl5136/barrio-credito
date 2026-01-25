@@ -10,25 +10,27 @@ export default function ProductorDashboard() {
     const [formData, setFormData] = useState({
         nombre: '',
         precio: '',
-        cantidad: ''
+        stock: '' // CORREGIDO: Antes era 'cantidad'
     });
 
     useEffect(() => {
-        cargarProductos();
-    }, []);
+        if (user) cargarProductos();
+    }, [user]);
 
     const cargarProductos = async () => {
-        const { data } = await supabase
-            .from('productos')
+        // CORREGIDO: Tabla 'products' (inglés)
+        const { data, error } = await supabase
+            .from('products') 
             .select('*')
             .eq('productor_id', user.id)
             .order('created_at', { ascending: false });
 
+        if (error) console.error("Error cargando:", error);
         setProductos(data || []);
     };
 
     const handleSubmit = async () => {
-        if (!formData.nombre || !formData.precio || !formData.cantidad) {
+        if (!formData.nombre || !formData.precio || !formData.stock) {
             alert('Por favor completa todos los campos');
             return;
         }
@@ -36,12 +38,12 @@ export default function ProductorDashboard() {
         const nuevoProducto = {
             nombre: formData.nombre,
             precio: parseFloat(formData.precio),
-            cantidad: parseInt(formData.cantidad),
+            stock: parseInt(formData.stock), // CORREGIDO: Campo 'stock'
             productor_id: user.id
         };
 
         const { error } = await supabase
-            .from('productos')
+            .from('products') // CORREGIDO
             .insert([nuevoProducto]);
 
         if (error) {
@@ -49,21 +51,23 @@ export default function ProductorDashboard() {
             return;
         }
 
-        setFormData({ nombre: '', precio: '', cantidad: '' });
+        setFormData({ nombre: '', precio: '', stock: '' });
         setShowForm(false);
         cargarProductos();
     };
 
-    const actualizarCantidad = async (id, nuevaCantidad) => {
-        if (nuevaCantidad < 0) return;
+    const actualizarCantidad = async (id, nuevoStock) => {
+        if (nuevoStock < 0) return;
 
         const { error } = await supabase
-            .from('productos')
-            .update({ cantidad: nuevaCantidad })
+            .from('products') // CORREGIDO
+            .update({ stock: nuevoStock }) // CORREGIDO: Campo 'stock'
             .eq('id', id);
 
         if (!error) {
             cargarProductos();
+        } else {
+            console.error(error);
         }
     };
 
@@ -71,7 +75,7 @@ export default function ProductorDashboard() {
         if (!confirm('¿Estás seguro de eliminar este producto?')) return;
 
         const { error } = await supabase
-            .from('productos')
+            .from('products') // CORREGIDO
             .delete()
             .eq('id', id);
 
@@ -139,11 +143,11 @@ export default function ProductorDashboard() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-1">Cantidad Disponible</label>
+                                <label className="block text-sm font-medium mb-1">Stock Disponible</label>
                                 <input
                                     type="number"
-                                    value={formData.cantidad}
-                                    onChange={(e) => setFormData({ ...formData, cantidad: e.target.value })}
+                                    value={formData.stock}
+                                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                                     className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
                                     placeholder="0"
                                 />
@@ -178,23 +182,23 @@ export default function ProductorDashboard() {
                                     <h3 className="font-bold text-lg">{producto.nombre}</h3>
                                     <p className="text-gray-600">Precio: ${producto.precio}</p>
                                     <p className="text-gray-600">
-                                        Disponible: {producto.cantidad} unidades
-                                        {producto.cantidad === 0 && (
+                                        Disponible: {producto.stock} unidades {/* CORREGIDO: stock */}
+                                        {producto.stock === 0 && (
                                             <span className="ml-2 text-red-600 font-semibold">AGOTADO</span>
                                         )}
                                     </p>
                                 </div>
                                 <div className="flex gap-2 items-center">
                                     <button
-                                        onClick={() => actualizarCantidad(producto.id, producto.cantidad - 1)}
-                                        disabled={producto.cantidad === 0}
+                                        onClick={() => actualizarCantidad(producto.id, producto.stock - 1)}
+                                        disabled={producto.stock === 0}
                                         className="p-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <Minus size={16} />
                                     </button>
-                                    <span className="px-3 font-semibold">{producto.cantidad}</span>
+                                    <span className="px-3 font-semibold">{producto.stock}</span>
                                     <button
-                                        onClick={() => actualizarCantidad(producto.id, producto.cantidad + 1)}
+                                        onClick={() => actualizarCantidad(producto.id, producto.stock + 1)}
                                         className="p-2 bg-gray-200 rounded hover:bg-gray-300"
                                     >
                                         <Plus size={16} />
