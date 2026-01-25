@@ -2,44 +2,102 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from './services/supabase';
 
 const AuthContext = createContext({});
-
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [userRole, setUserRole] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // Obtener sesión actual
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setUser(session?.user ?? null);
+    const fetchUserRole = async (user) => {
+        if (!user) return null;
+
+        if (user.user_metadata?.rol) {
+            return user.user_metadata.rol;
+        }
+
+        const { data, error } = await supabase
+            .from('perfiles')
+            .select('rol')
+            .eq('id', user.id)
+            .single();
+
+        if (error) return null;
+        return data?.rol ?? null;
+    };
+
+    const applySession = async (session) => {
+        if (!session?.user) {
+            setUser(null);
+            setUserRole(null);
             setLoading(false);
-        });
+            return;
+        }
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-            setUser(session?.user ?? null);
-        });
+        setUser(session.user);
+        const role = await fetchUserRole(session.user);
+        setUserRole(role);
+        setLoading(false);
+    };
 
-        return () => subscription.unsubscribe();
+    useEffect(() => {
+        let mounted = true;
+
+        const init = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (mounted) await applySession(session);
+        };
+
+        init();
+
+        const { data: { subscription } } =
+            supabase.auth.onAuthStateChange(async (_, session) => {
+                if (!mounted) return;
+                setLoading(true);
+                await applySession(session);
+            });
+
+        return () => {
+            mounted = false;
+            subscription.unsubscribe();
+        };
     }, []);
 
-    const signUp = async (email, password) => {
-        const { data, error } = await supabase.auth.signUp({ email, password });
-        return { data, error };
-    };
+    const signUp = (email, password, rol) =>
+        supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { rol } }
+        });
 
-    const signIn = async (email, password) => {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        return { data, error };
-    };
+    const signIn = (email, password) =>
+        supabase.auth.signInWithPassword({ email, password });
 
     const signOut = async () => {
-        const { error } = await supabase.auth.signOut();
-        return { error };
+        setUser(null);
+        setUserRole(null);
+        await supabase.auth.signOut();
     };
 
+    const getUserProfile = (userId) =>
+        supabase
+            .from('perfiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+
     return (
-        <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut }}>
+        <AuthContext.Provider
+            value={{
+                user,
+                userRole,
+                loading,
+                signUp,
+                signIn,
+                signOut,
+                getUserProfile
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );

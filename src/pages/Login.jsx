@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [role, setRole] = useState('tiendita');
     const [isSignUp, setIsSignUp] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -17,15 +18,23 @@ export default function Login() {
         setError('');
         setLoading(true);
 
-        const { error } = isSignUp
-            ? await signUp(email, password)
-            : await signIn(email, password);
-
-        if (error) {
-            setError(error.message);
-            setLoading(false);
+        if (isSignUp) {
+            const { error } = await signUp(email, password, role);
+            if (error) {
+                setError(error.message);
+                setLoading(false);
+            } else {
+                navigate(role === 'productor' ? '/productor' : '/tiendita');
+            }
         } else {
-            navigate('/home');
+            const { data, error } = await signIn(email, password);
+            if (error) {
+                setError(error.message);
+                setLoading(false);
+            } else {
+                const userRole = data.user?.user_metadata?.rol;
+                navigate(userRole === 'productor' ? '/productor' : '/tiendita');
+            }
         }
     };
 
@@ -69,6 +78,22 @@ export default function Login() {
                             minLength="6"
                         />
                     </div>
+
+                    {isSignUp && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Tipo de cuenta
+                            </label>
+                            <select
+                                value={role}
+                                onChange={(e) => setRole(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="productor">Productor</option>
+                                <option value="tiendita">Tiendita</option>
+                            </select>
+                        </div>
+                    )}
 
                     <button
                         type="submit"
