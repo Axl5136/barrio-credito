@@ -10,28 +10,33 @@ export default function ProductorDashboard() {
     const [formData, setFormData] = useState({
         nombre: '',
         precio: '',
-        cantidad: '',
+
+        stock: '',
         descripcion: ''
+
     });
 
     useEffect(() => {
-        cargarProductos();
-    }, []);
+        if (user) cargarProductos();
+    }, [user]);
 
     const cargarProductos = async () => {
-        if (!user?.id) return;
+
+      
         
         const { data } = await supabase
-            .from('productos')
+            .from('products')
+
             .select('*')
             .eq('productor_id', user.id)
             .order('created_at', { ascending: false });
 
+        if (error) console.error("Error cargando:", error);
         setProductos(data || []);
     };
 
     const handleSubmit = async () => {
-        if (!formData.nombre || !formData.precio || !formData.cantidad) {
+        if (!formData.nombre || !formData.precio || !formData.stock) {
             alert('Por favor completa todos los campos');
             return;
         }
@@ -44,13 +49,15 @@ export default function ProductorDashboard() {
         const nuevoProducto = {
             nombre: formData.nombre,
             precio: parseFloat(formData.precio),
-            cantidad: parseInt(formData.cantidad),
+
+            stock: parseInt(formData.stock),
             descripcion: formData.descripcion || '',
+
             productor_id: user.id
         };
 
         const { error } = await supabase
-            .from('productos')
+            .from('products') // CORREGIDO
             .insert([nuevoProducto]);
 
         if (error) {
@@ -58,21 +65,26 @@ export default function ProductorDashboard() {
             return;
         }
 
-        setFormData({ nombre: '', precio: '', cantidad: '', descripcion: '' });
+
+        setFormData({ nombre: '', precio: '', stock: '', descripcion: '' });
+
+    
         setShowForm(false);
         cargarProductos();
     };
 
-    const actualizarCantidad = async (id, nuevaCantidad) => {
-        if (nuevaCantidad < 0) return;
+    const actualizarCantidad = async (id, nuevoStock) => {
+        if (nuevoStock < 0) return;
 
         const { error } = await supabase
-            .from('productos')
-            .update({ cantidad: nuevaCantidad })
+            .from('products') // CORREGIDO
+            .update({ stock: nuevoStock }) // CORREGIDO: Campo 'stock'
             .eq('id', id);
 
         if (!error) {
             cargarProductos();
+        } else {
+            console.error(error);
         }
     };
 
@@ -80,7 +92,7 @@ export default function ProductorDashboard() {
         if (!confirm('¿Estás seguro de eliminar este producto?')) return;
 
         const { error } = await supabase
-            .from('productos')
+            .from('products') // CORREGIDO
             .delete()
             .eq('id', id);
 
@@ -208,12 +220,14 @@ export default function ProductorDashboard() {
                                 />
                             </div>
                             <div>
+
                                 <label className="block text-gray-700 font-medium mb-1">Cantidad Disponible</label>
                                 <input
                                     type="number"
-                                    value={formData.cantidad}
-                                    onChange={(e) => setFormData({ ...formData, cantidad: e.target.value })}
+                                    value={formData.stock}
+                                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                                     className="w-full px-4 py-3 border-2 border-yellow-200 focus:border-yellow-500 rounded-lg focus:outline-none transition-colors h-12"
+
                                     placeholder="0"
                                 />
                             </div>
@@ -254,6 +268,7 @@ export default function ProductorDashboard() {
                 ) : (
                     <div className="grid gap-4">
                         {productos.map((producto) => (
+
                             <div
                                 key={producto.id}
                                 className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-shadow border-l-8 border-pink-500"
@@ -271,13 +286,13 @@ export default function ProductorDashboard() {
                                             </p>
                                             <p className="flex items-center gap-1">
                                                 <span className="font-semibold text-pink-600">Disponible:</span>
-                                                <span className="text-lg">{producto.cantidad} unidades</span>
+                                                <span className="text-lg">{producto.stock} unidades</span>
                                                 {producto.cantidad === 0 && (
                                                     <span className="ml-2 px-3 py-1 bg-red-100 text-red-600 text-sm font-bold rounded-full">
                                                         AGOTADO
                                                     </span>
                                                 )}
-                                                {producto.cantidad > 0 && producto.cantidad < 10 && (
+                                                {producto.stock > 0 && producto.stock < 10 && (
                                                     <span className="ml-2 px-3 py-1 bg-yellow-100 text-yellow-600 text-sm font-bold rounded-full">
                                                         BAJO STOCK
                                                     </span>
@@ -295,15 +310,15 @@ export default function ProductorDashboard() {
                                     <div className="flex items-center gap-3">
                                         <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-2">
                                             <button
-                                                onClick={() => actualizarCantidad(producto.id, producto.cantidad - 1)}
-                                                disabled={producto.cantidad === 0}
+                                                onClick={() => actualizarCantidad(producto.id, producto.stock - 1)}
+                                                disabled={producto.stock === 0}
                                                 className="p-2 bg-white rounded-lg hover:bg-pink-100 hover:text-pink-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                                             >
                                                 <Minus size={18} />
                                             </button>
                                             <span className="px-4 font-bold text-xl min-w-[3rem] text-center">{producto.cantidad}</span>
                                             <button
-                                                onClick={() => actualizarCantidad(producto.id, producto.cantidad + 1)}
+                                                onClick={() => actualizarCantidad(producto.id, producto.stock + 1)}
                                                 className="p-2 bg-white rounded-lg hover:bg-green-100 hover:text-green-600 transition-colors shadow-sm"
                                             >
                                                 <Plus size={18} />
@@ -316,6 +331,7 @@ export default function ProductorDashboard() {
                                             <Trash2 size={20} />
                                         </button>
                                     </div>
+
                                 </div>
                             </div>
                         ))}

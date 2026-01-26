@@ -63,17 +63,48 @@ export const AuthProvider = ({ children }) => {
         };
     }, []);
 
-    const signUp = (email, password, rol, nombre_negocio = null) =>
-        supabase.auth.signUp({
+
+    const signUp = async (email, password, rol, nombreNegocio) => {
+        // 1. Crear el usuario en Auth (Login)
+        const { data, error } = await supabase.auth.signUp({
             email,
             password,
-            options: { 
-                data: { 
-                    rol,
-                    ...(nombre_negocio && { nombre_negocio })
-                } 
+            options: {
+                data: {
+                    rol: rol, 
+                    nombre_negocio: nombreNegocio || 'Nuevo Negocio'
+                }
+
             }
         });
+
+        if (error) return { error }; // Si falla el correo, regresamos el error
+
+        // 2. Crear el Perfil en la Base de Datos (Manual)
+        if (data.user) {
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .insert({
+                    id: data.user.id,
+                    rol: rol, // Login.jsx ya lo manda en minúsculas, así que pasará bien
+                    nombre_negocio: nombreNegocio || 'Nuevo Negocio'
+                });
+
+            // 3. Crear Wallet vacía (Solo si es tiendita)
+            if (!profileError && rol === 'tiendita') {
+                 await supabase.from('wallets').insert({
+                    user_id: data.user.id,
+                    limite_credito: 0,
+                    saldo_utilizado: 0
+                 });
+            }
+            
+            // Si hubo error creando el perfil, lo imprimimos en consola
+            if (profileError) console.error("Error perfil:", profileError);
+        }
+        
+        return { data, error: null };
+    };
 
     const signIn = (email, password) =>
         supabase.auth.signInWithPassword({ email, password });
