@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         const { data, error } = await supabase
-            .from('perfiles')
+            .from('profiles')
             .select('rol')
             .eq('id', user.id)
             .single();
@@ -63,11 +63,16 @@ export const AuthProvider = ({ children }) => {
         };
     }, []);
 
-    const signUp = (email, password, rol) =>
+    const signUp = (email, password, rol, nombre_negocio = null) =>
         supabase.auth.signUp({
             email,
             password,
-            options: { data: { rol } }
+            options: { 
+                data: { 
+                    rol,
+                    ...(nombre_negocio && { nombre_negocio })
+                } 
+            }
         });
 
     const signIn = (email, password) =>
@@ -81,7 +86,7 @@ export const AuthProvider = ({ children }) => {
 
     const getUserProfile = (userId) =>
         supabase
-            .from('perfiles')
+            .from('profiles')
             .select('*')
             .eq('id', userId)
             .single();
