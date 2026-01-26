@@ -63,6 +63,7 @@ export const AuthProvider = ({ children }) => {
         };
     }, []);
 
+
     const signUp = async (email, password, rol, nombreNegocio) => {
         // 1. Crear el usuario en Auth (Login)
         const { data, error } = await supabase.auth.signUp({
@@ -73,6 +74,7 @@ export const AuthProvider = ({ children }) => {
                     rol: rol, 
                     nombre_negocio: nombreNegocio || 'Nuevo Negocio'
                 }
+
             }
         });
 
