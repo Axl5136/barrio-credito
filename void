@@ -1,0 +1,907 @@
+[1mdiff --git a/.vscode/extensions.json b/.vscode/extensions.json[m
+[1mnew file mode 100644[m
+[1mindex 0000000..74baffc[m
+[1m--- /dev/null[m
+[1m+++ b/.vscode/extensions.json[m
+[36m@@ -0,0 +1,3 @@[m
+[32m+[m[32m{[m
+[32m+[m[32m  "recommendations": ["denoland.vscode-deno"][m
+[32m+[m[32m}[m
+[1mdiff --git a/supabase/.gitignore b/supabase/.gitignore[m
+[1mnew file mode 100644[m
+[1mindex 0000000..ad9264f[m
+[1m--- /dev/null[m
+[1m+++ b/supabase/.gitignore[m
+[36m@@ -0,0 +1,8 @@[m
+[32m+[m[32m# Supabase[m
+[32m+[m[32m.branches[m
+[32m+[m[32m.temp[m
+[32m+[m
+[32m+[m[32m# dotenvx[m
+[32m+[m[32m.env.keys[m
+[32m+[m[32m.env.local[m
+[32m+[m[32m.env.*.local[m
+[1mdiff --git a/supabase/config.toml b/supabase/config.toml[m
+[1mnew file mode 100644[m
+[1mindex 0000000..9a5e0e0[m
+[1m--- /dev/null[m
+[1m+++ b/supabase/config.toml[m
+[36m@@ -0,0 +1,395 @@[m
+[32m+[m[32m# For detailed configuration reference documentation, visit:[m
+[32m+[m[32m# https://supabase.com/docs/guides/local-development/cli/config[m
+[32m+[m[32m# A string used to distinguish different Supabase projects on the same host. Defaults to the[m
+[32m+[m[32m# working directory name when running `supabase init`.[m
+[32m+[m[32mproject_id = "barrio-credito"[m
+[32m+[m
+[32m+[m[32m[api][m
+[32m+[m[32menabled = true[m
+[32m+[m[32m# Port to use for the API URL.[m
+[32m+[m[32mport = 54321[m
+[32m+[m[32m# Schemas to expose in your API. Tables, views and stored procedures in this schema will get API[m
+[32m+[m[32m# endpoints. `public` and `graphql_public` schemas are included by default.[m
+[32m+[m[32mschemas = ["public", "graphql_public"][m
+[32m+[m[32m# Extra schemas to add to the search_path of every request.[m
+[32m+[m[32mextra_search_path = ["public", "extensions"][m
+[32m+[m[32m# The maximum number of rows returns from a view, table, or stored procedure. Limits payload size[m
+[32m+[m[32m# for accidental or malicious requests.[m
+[32m+[m[32mmax_rows = 1000[m
+[32m+[m
+[32m+[m[32m[api.tls][m
+[32m+[m[32m# Enable HTTPS endpoints locally using a self-signed certificate.[m
+[32m+[m[32menabled = false[m
+[32m+[m[32m# Paths to self-signed certificate pair.[m
+[32m+[m[32m# cert_path = "../certs/my-cert.pem"[m
+[32m+[m[32m# key_path = "../certs/my-key.pem"[m
+[32m+[m
+[32m+[m[32m[db][m
+[32m+[m[32m# Port to use for the local database URL.[m
+[32m+[m[32mport = 54322[m
+[32m+[m[32m# Port used by db diff command to initialize the shadow database.[m
+[32m+[m[32mshadow_port = 54320[m
+[32m+[m[32m# Maximum amount of time to wait for health check when starting the local database.[m
+[32m+[m[32mhealth_timeout = "2m"[m
+[32m+[m[32m# The database major version to use. This has to be the same as your remote database's. Run `SHOW[m
+[32m+[m[32m# server_version;` on the remote database to check.[m
+[32m+[m[32mmajor_version = 17[m
+[32m+[m
+[32m+[m[32m[db.pooler][m
+[32m+[m[32menabled = false[m
+[32m+[m[32m# Port to use for the local connection pooler.[m
+[32m+[m[32mport = 54329[m
+[32m+[m[32m# Specifies when a server connection can be reused by other clients.[m
+[32m+[m[32m# Configure one of the supported pooler modes: `transaction`, `session`.[m
+[32m+[m[32mpool_mode = "transaction"[m
+[32m+[m[32m# How many server connections to allow per user/database pair.[m
+[32m+[m[32mdefault_pool_size = 20[m
+[32m+[m[32m# Maximum number of client connections allowed.[m
+[32m+[m[32mmax_client_conn = 100[m
+[32m+[m
+[32m+[m[32m# [db.vault][m
+[32m+[m[32m# secret_key = "env(SECRET_VALUE)"[m
+[32m+[m
+[32m+[m[32m[db.migrations][m
+[32m+[m[32m# If disabled, migrations will be skipped during a db push or reset.[m
+[32m+[m[32menabled = true[m
+[32m+[m[32m# Specifies an ordered list of schema files that describe your database.[m
+[32m+[m[32m# Supports glob patterns relative to supabase directory: "./schemas/*.sql"[m
+[32m+[m[32mschema_paths = [][m
+[32m+[m
+[32m+[m[32m[db.seed][m
+[32m+[m[32m# If enabled, seeds the database after migrations during a db reset.[m
+[32m+[m[32menabled = true[m
+[32m+[m[32m# Specifies an ordered list of seed files to load during db reset.[m
+[32m+[m[32m# Supports glob patterns relative to supabase directory: "./seeds/*.sql"[m
+[32m+[m[32msql_paths = ["./seed.sql"][m
+[32m+[m
+[32m+[m[32m[db.network_restrictions][m
+[32m+[m[32m# Enable management of network restrictions.[m
+[32m+[m[32menabled = false[m
+[32m+[m[32m# List of IPv4 CIDR blocks allowed to connect to the database.[m
+[32m+[m[32m# Defaults to allow all IPv4 connections. Set empty array to block all IPs.[m
+[32m+[m[32mallowed_cidrs = ["0.0.0.0/0"][m
+[32m+[m[32m# List of IPv6 CIDR blocks allowed to connect to the database.[m
+[32m+[m[32m# Defaults to allow all IPv6 connections. Set empty array to block all IPs.[m
+[32m+[m[32mallowed_cidrs_v6 = ["::/0"][m
+[32m+[m
+[32m+[m[32m[realtime][m
+[32m+[m[32menabled = true[m
+[32m+[m[32m# Bind realtime via either IPv4 or IPv6. (default: IPv4)[m
+[32m+[m[32m# ip_version = "IPv6"[m
+[32m+[m[32m# The maximum length in bytes of HTTP request headers. (default: 4096)[m
+[32m+[m[32m# max_header_length = 4096[m
+[32m+[m
+[32m+[m[32m[studio][m
+[32m+[m[32menabled = true[m
+[32m+[m[32m# Port to use for Supabase Studio.[m
+[32m+[m[32mport = 54323[m
+[32m+[m[32m# External URL of the API server that frontend connects to.[m
+[32m+[m[32mapi_url = "http://127.0.0.1"[m
+[32m+[m[32m# OpenAI API Key to use for Supabase AI in the Supabase Studio.[m
+[32m+[m[32mopenai_api_key = "env(OPENAI_API_KEY)"[m
+[32m+[m
+[32m+[m[32m# Email testing server. Emails sent with the local dev setup are not actually sent - rather, they[m
+[32m+[m[32m# are monitored, and you can view the emails that would have been sent from the web interface.[m
+[32m+[m[32m[inbucket][m
+[32m+[m[32menabled = true[m
+[32m+[m[32m# Port to use for the email testing server web interface.[m
+[32m+[m[32mport = 54324[m
+[32m+[m[32m# Uncomment to expose additional ports for testing user applications that send emails.[m
+[32m+[m[32m# smtp_port = 54325[m
+[32m+[m[32m# pop3_port = 54326[m
+[32m+[m[32m# admin_email = "admin@email.com"[m
+[32m+[m[32m# sender_name = "Admin"[m
+[32m+[m
+[32m+[m[32m[storage][m
+[32m+[m[32menabled = true[m
+[32m+[m[32m# The maximum file size allowed (e.g. "5MB", "500KB").[m
+[32m+[m[32mfile_size_limit = "50MiB"[m
+[32m+[m
+[32m+[m[32m# Uncomment to configure local storage buckets[m
+[32m+[m[32m# [storage.buckets.images][m
+[32m+[m[32m# public = false[m
+[32m+[m[32m# file_size_limit = "50MiB"[m
+[32m+[m[32m# allowed_mime_types = ["image/png", "image/jpeg"][m
+[32m+[m[32m# objects_path = "./images"[m
+[32m+[m
+[32m+[m[32m# Allow connections via S3 compatible clients[m
+[32m+[m[32m[storage.s3_protocol][m
+[32m+[m[32menabled = true[m
+[32m+[m
+[32m+[m[32m# Image transformation API is available to Supabase Pro plan.[m
+[32m+[m[32m# [storage.image_transformation][m
+[32m+[m[32m# enabled = true[m
+[32m+[m
+[32m+[m[32m# Store analytical data in S3 for running ETL jobs over Iceberg Catalog[m
+[32m+[m[32m# This feature is only available on the hosted platform.[m
+[32m+[m[32m[storage.analytics][m
+[32m+[m[32menabled = false[m
+[32m+[m[32mmax_namespaces = 5[m
+[32m+[m[32mmax_tables = 10[m
+[32m+[m[32mmax_catalogs = 2[m
+[32m+[m
+[32m+[m[32m# Analytics Buckets is available to Supabase Pro plan.[m
+[32m+[m[32m# [storage.analytics.buckets.my-warehouse][m
+[32m+[m
+[32m+[m[32m# Store vector embeddings in S3 for large and durable datasets[m
+[32m+[m[32m# This feature is only available on the hosted platform.[m
+[32m+[m[32m[storage.vector][m
+[32m+[m[32menabled = false[m
+[32m+[m[32mmax_buckets = 10[m
+[32m+[m[32mmax_indexes = 5[m
+[32m+[m
+[32m+[m[32m# Vector Buckets is available to Supabase Pro plan.[m
+[32m+[m[32m# [storage.vector.buckets.documents-openai][m
+[32m+[m
+[32m+[m[32m[auth][m
+[32m+[m[32menabled = true[m
+[32m+[m[32m# The base URL of your website. Used as an allow-list for redirects and for constructing URLs used[m
+[32m+[m[32m# in emails.[m
+[32m+[m[32msite_url = "http://127.0.0.1:3000"[m
+[32m+[m[32m# A list of *exact* URLs that auth providers are permitted to redirect to post authentication.[m
+[32m+[m[32madditional_redirect_urls = ["https://127.0.0.1:3000"][m
+[32m+[m[32m# How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).[m
+[32m+[m[32mjwt_expiry = 3600[m
+[32m+[m[32m# JWT issuer URL. If not set, defaults to the local API URL (http://127.0.0.1:<port>/auth/v1).[m
+[32m+[m[32m# jwt_issuer = ""[m
+[32m+[m[32m# Path to JWT signing key. DO NOT commit your signing keys file to git.[m
+[32m+[m[32m# signing_keys_path = "./signing_keys.json"[m
+[32m+[m[32m# If disabled, the refresh token will never expire.[m
+[32m+[m[32menable_refresh_token_rotation = true[m
+[32m+[m[32m# Allows refresh tokens to be reused after expiry, up to the specified interval in seconds.[m
+[32m+[m[32m# Requires enable_refresh_token_rotation = true.[m
+[32m+[m[32mrefresh_token_reuse_interval = 10[m
+[32m+[m[32m# Allow/disallow new user signups to your project.[m
+[32m+[m[32menable_signup = true[m
+[32m+[m[32m# Allow/disallow anonymous sign-ins to your project.[m
+[32m+[m[32menable_anonymous_sign_ins = false[m
+[32m+[m[32m# Allow/disallow testing manual linking of accounts[m
+[32m+[m[32menable_manual_linking = false[m
+[32m+[m[32m# Passwords shorter than this value will be rejected as weak. Minimum 6, recommended 8 or more.[m
+[32m+[m[32mminimum_password_length = 6[m
+[32m+[m[32m# Passwords that do not meet the following requirements will be rejected as weak. Supported values[m
+[32m+[m[32m# are: `letters_digits`, `lower_upper_letters_digits`, `lower_upper_letters_digits_symbols`[m
+[32m+[m[32mpassword_requirements = ""[m
+[32m+[m
+[32m+[m[32m[auth.rate_limit][m
+[32m+[m[32m# Number of emails that can be sent per hour. Requires auth.email.smtp to be enabled.[m
+[32m+[m[32memail_sent = 2[m
+[32m+[m[32m# Number of SMS messages that can be sent per hour. Requires auth.sms to be enabled.[m
+[32m+[m[32msms_sent = 30[m
+[32m+[m[32m# Number of anonymous sign-ins that can be made per hour per IP address. Requires enable_anonymous_sign_ins = true.[m
+[32m+[m[32manonymous_users = 30[m
+[32m+[m[32m# Number of sessions that can be refreshed in a 5 minute interval per IP address.[m
+[32m+[m[32mtoken_refresh = 150[m
+[32m+[m[32m# Number of sign up and sign-in requests that can be made in a 5 minute interval per IP address (excludes anonymous users).[m
+[32m+[m[32msign_in_sign_ups = 30[m
+[32m+[m[32m# Number of OTP / Magic link verifications that can be made in a 5 minute interval per IP address.[m
+[32m+[m[32mtoken_verifications = 30[m
+[32m+[m[32m# Number of Web3 logins that can be made in a 5 minute interval per IP address.[m
+[32m+[m[32mweb3 = 30[m
+[32m+[m
+[32m+[m[32m# Configure one of the supported captcha providers: `hcaptcha`, `turnstile`.[m
+[32m+[m[32m# [auth.captcha][m
+[32m+[m[32m# enabled = true[m
+[32m+[m[32m# provider = "hcaptcha"[m
+[32m+[m[32m# secret = ""[m
+[32m+[m
+[32m+[m[32m[auth.email][m
+[32m+[m[32m# Allow/disallow new user signups via email to your project.[m
+[32m+[m[32menable_signup = true[m
+[32m+[m[32m# If enabled, a user will be required to confirm any email change on both the old, and new email[m
+[32m+[m[32m# addresses. If disabled, only the new email is required to confirm.[m
+[32m+[m[32mdouble_confirm_changes = true[m
+[32m+[m[32m# If enabled, users need to confirm their email address before signing in.[m
+[32m+[m[32menable_confirmations = false[m
+[32m+[m[32m# If enabled, users will need to reauthenticate or have logged in recently to change their password.[m
+[32m+[m[32msecure_password_change = false[m
+[32m+[m[32m# Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.[m
+[32m+[m[32mmax_frequency = "1s"[m
+[32m+[m[32m# Number of characters used in the email OTP.[m
+[32m+[m[32motp_length = 6[m
+[32m+[m[32m# Number of seconds before the email OTP expires (defaults to 1 hour).[m
+[32m+[m[32motp_expiry = 3600[m
+[32m+[m
+[32m+[m[32m# Use a production-ready SMTP server[m
+[32m+[m[32m# [auth.email.smtp][m
+[32m+[m[32m# enabled = true[m
+[32m+[m[32m# host = "smtp.sendgrid.net"[m
+[32m+[m[32m# port = 587[m
+[32m+[m[32m# user = "apikey"[m
+[32m+[m[32m# pass = "env(SENDGRID_API_KEY)"[m
+[32m+[m[32m# admin_email = "admin@email.com"[m
+[32m+[m[32m# sender_name = "Admin"[m
+[32m+[m
+[32m+[m[32m# Uncomment to customize email template[m
+[32m+[m[32m# [auth.email.template.invite][m
+[32m+[m[32m# subject = "You have been invited"[m
+[32m+[m[32m# content_path = "./supabase/templates/invite.html"[m
+[32m+[m
+[32m+[m[32m# Uncomment to customize notification email template[m
+[32m+[m[32m# [auth.email.notification.password_changed][m
+[32m+[m[32m# enabled = true[m
+[32m+[m[32m# subject = "Your password has been changed"[m
+[32m+[m[32m# content_path = "./templates/password_changed_notification.html"[m
+[32m+[m
+[32m+[m[32m[auth.sms][m
+[32m+[m[32m# Allow/disallow new user signups via SMS to your project.[m
+[32m+[m[32menable_signup = false[m
+[32m+[m[32m# If enabled, users need to confirm their phone number before signing in.[m
+[32m+[m[32menable_confirmations = false[m
+[32m+[m[32m# Template for sending OTP to users[m
+[32m+[m[32mtemplate = "Your code is {{ .Code }}"[m
+[32m+[m[32m# Controls the minimum amount of time that must pass before sending another sms otp.[m
+[32m+[m[32mmax_frequency = "5s"[m
+[32m+[m
+[32m+[m[32m# Use pre-defined map of phone number to OTP for testing.[m
+[32m+[m[32m# [auth.sms.test_otp][m
+[32m+[m[32m# 4152127777 = "123456"[m
+[32m+[m
+[32m+[m[32m# Configure logged in session timeouts.[m
+[32m+[m[32m# [auth.sessions][m
+[32m+[m[32m# Force log out after the specified duration.[m
+[32m+[m[32m# timebox = "24h"[m
+[32m+[m[32m# Force log out if the user has been inactive longer than the specified duration.[m
+[32m+[m[32m# inactivity_timeout = "8h"[m
+[32m+[m
+[32m+[m[32m# This hook runs before a new user is created and allows developers to reject the request based on the incoming user object.[m
+[32m+[m[32m# [auth.hook.before_user_created][m
+[32m+[m[32m# enabled = true[m
+[32m+[m[32m# uri = "pg-functions://postgres/auth/before-user-created-hook"[m
+[32m+[m
+[32m+[m[32m# This hook runs before a token is issued and allows you to add additional claims based on the authentication method used.[m
+[32m+[m[32m# [auth.hook.custom_access_token][m
+[32m+[m[32m# enabled = true[m
+[32m+[m[32m# uri = "pg-functions://<database>/<schema>/<hook_name>"[m
+[32m+[m
+[32m+[m[32m# Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.[m
+[32m+[m[32m[auth.sms.twilio][m
+[32m+[m[32menabled = false[m
+[32m+[m[32maccount_sid = ""[m
+[32m+[m[32mmessage_service_sid = ""[m
+[32m+[m[32m# DO NOT commit your Twilio auth token to git. Use environment variable substitution instead:[m
+[32m+[m[32mauth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"[m
+[32m+[m
+[32m+[m[32m# Multi-factor-authentication is available to Supabase Pro plan.[m
+[32m+[m[32m[auth.mfa][m
+[32m+[m[32m# Control how many MFA factors can be enrolled at once per user.[m
+[32m+[m[32mmax_enrolled_factors = 10[m
+[32m+[m
+[32m+[m[32m# Control MFA via App Authenticator (TOTP)[m
+[32m+[m[32m[auth.mfa.totp][m
+[32m+[m[32menroll_enabled = false[m
+[32m+[m[32mverify_enabled = false[m
+[32m+[m
+[32m+[m[32m# Configure MFA via Phone Messaging[m
+[32m+[m[32m[auth.mfa.phone][m
+[32m+[m[32menroll_enabled = false[m
+[32m+[m[32mverify_enabled = false[m
+[32m+[m[32motp_length = 6[m
+[32m+[m[32mtemplate = "Your code is {{ .Code }}"[m
+[32m+[m[32mmax_frequency = "5s"[m
+[32m+[m
+[32m+[m[32m# Configure MFA via WebAuthn[m
+[32m+[m[32m# [auth.mfa.web_authn][m
+[32m+[m[32m# enroll_enabled = true[m
+[32m+[m[32m# verify_enabled = true[m
+[32m+[m
+[32m+[m[32m# Use an external OAuth provider. The full list of providers are: `apple`, `azure`, `bitbucket`,[m
+[32m+[m[32m# `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,[m
+[32m+[m[32m# `twitter`, `x`, `slack`, `spotify`, `workos`, `zoom`.[m
+[32m+[m[32m[auth.external.apple][m
+[32m+[m[32menabled = false[m
+[32m+[m[32mclient_id = ""[m
+[32m+[m[32m# DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:[m
+[32m+[m[32msecret = "env(SUPABASE_AUTH_EXTERNAL_APPLE_SECRET)"[m
+[32m+[m[32m# Overrides the default auth redirectUrl.[m
+[32m+[m[32mredirect_uri = ""[m
+[32m+[m[32m# Overrides the default auth provider URL. Used to support self-hosted gitlab, single-tenant Azure,[m
+[32m+[m[32m# or any other third-party OIDC providers.[m
+[32m+[m[32murl = ""[m
+[32m+[m[32m# If enabled, the nonce check will be skipped. Required for local sign in with Google auth.[m
+[32m+[m[32mskip_nonce_check = false[m
+[32m+[m[32m# If enabled, it will allow the user to successfully authenticate when the provider does not return an email address.[m
+[32m+[m[32memail_optional = false[m
+[32m+[m
+[32m+[m[32m# Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.[m
+[32m+[m[32m# You can configure "web3" rate limit in the [auth.rate_limit] section and set up [auth.captcha] if self-hosting.[m
+[32m+[m[32m[auth.web3.solana][m
+[32m+[m[32menabled = false[m
+[32m+[m
+[32m+[m[32m# Use Firebase Auth as a third-party provider alongside Supabase Auth.[m
+[32m+[m[32m[auth.third_party.firebase][m
+[32m+[m[32menabled = false[m
+[32m+[m[32m# project_id = "my-firebase-project"[m
+[32m+[m
+[32m+[m[32m# Use Auth0 as a third-party provider alongside Supabase Auth.[m
+[32m+[m[32m[auth.third_party.auth0][m
+[32m+[m[32menabled = false[m
+[32m+[m[32m# tenant = "my-auth0-tenant"[m
+[32m+[m[32m# tenant_region = "us"[m
+[32m+[m
+[32m+[m[32m# Use AWS Cognito (Amplify) as a third-party provider alongside Supabase Auth.[m
+[32m+[m[32m[auth.third_party.aws_cognito][m
+[32m+[m[32menabled = false[m
+[32m+[m[32m# user_pool_id = "my-user-pool-id"[m
+[32m+[m[32m# user_pool_region = "us-east-1"[m
+[32m+[m
+[32m+[m[32m# Use Clerk as a third-party provider alongside Supabase Auth.[m
+[32m+[m[32m[auth.third_party.clerk][m
+[32m+[m[32menabled = false[m
+[32m+[m[32m# Obtain from https://clerk.com/setup/supabase[m
+[32m+[m[32m# domain = "example.clerk.accounts.dev"[m
+[32m+[m
+[32m+[m[32m# OAuth server configuration[m
+[32m+[m[32m[auth.oauth_server][m
+[32m+[m[32m# Enable OAuth server functionality[m
+[32m+[m[32menabled = false[m
+[32m+[m[32m# Path for OAuth consent flow UI[m
+[32m+[m[32mauthorization_url_path = "/oauth/consent"[m
+[32m+[m[32m# Allow dynamic client registration[m
+[32m+[m[32mallow_dynamic_registration = false[m
+[32m+[m
+[32m+[m[32m[edge_runtime][m
+[32m+[m[32menabled = true[m
+[32m+[m[32m# Supported request policies: `oneshot`, `per_worker`.[m
+[32m+[m[32m# `per_worker` (default) — enables hot reload during local development.[m
+[32m+[m[32m# `oneshot` — fallback mode if hot reload causes issues (e.g. in large repos or with symlinks).[m
+[32m+[m[32mpolicy = "per_worker"[m
+[32m+[m[32m# Port to attach the Chrome inspector for debugging edge functions.[m
+[32m+[m[32minspector_port = 8083[m
+[32m+[m[32m# The Deno major version to use.[m
+[32m+[m[32mdeno_version = 2[m
+[32m+[m
+[32m+[m[32m# [edge_runtime.secrets][m
+[32m+[m[32m# secret_key = "env(SECRET_VALUE)"[m
+[32m+[m
+[32m+[m[32m[analytics][m
+[32m+[m[32menabled = true[m
+[32m+[m[32mport = 54327[m
+[32m+[m[32m# Configure one of the supported backends: `postgres`, `bigquery`.[m
+[32m+[m[32mbackend = "postgres"[m
+[32m+[m
+[32m+[m[32m# Experimental features may be deprecated any time[m
+[32m+[m[32m[experimental][m
+[32m+[m[32m# Configures Postgres storage engine to use OrioleDB (S3)[m
+[32m+[m[32morioledb_version = ""[m
+[32m+[m[32m# Configures S3 bucket URL, eg. <bucket_name>.s3-<region>.amazonaws.com[m
+[32m+[m[32ms3_host = "env(S3_HOST)"[m
+[32m+[m[32m# Configures S3 bucket region, eg. us-east-1[m
+[32m+[m[32ms3_region = "env(S3_REGION)"[m
+[32m+[m[32m# Configures AWS_ACCESS_KEY_ID for S3 bucket[m
+[32m+[m[32ms3_access_key = "env(S3_ACCESS_KEY)"[m
+[32m+[m[32m# Configures AWS_SECRET_ACCESS_KEY for S3 bucket[m
+[32m+[m[32ms3_secret_key = "env(S3_SECRET_KEY)"[m
+[32m+[m
+[32m+[m[32m[functions.process-audio][m
+[32m+[m[32menabled = true[m
+[32m+[m[32mverify_jwt = true[m
+[32m+[m[32mimport_map = "./functions/process-audio/deno.json"[m
+[32m+[m[32m# Uncomment to specify a custom file path to the entrypoint.[m
+[32m+[m[32m# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx[m
+[32m+[m[32mentrypoint = "./functions/process-audio/index.ts"[m
+[32m+[m[32m# Specifies static files to be bundled with the function. Supports glob patterns.[m
+[32m+[m[32m# For example, if you want to serve static HTML pages in your function:[m
+[32m+[m[32m# static_files = [ "./functions/process-audio/*.html" ][m
+[1mdiff --git a/supabase/example/prueba1.mp3 b/supabase/example/prueba1.mp3[m
+[1mnew file mode 100644[m
+[1mindex 0000000..972f587[m
+Binary files /dev/null and b/supabase/example/prueba1.mp3 differ
+[1mdiff --git a/supabase/example/prueba2.mp3 b/supabase/example/prueba2.mp3[m
+[1mnew file mode 100644[m
+[1mindex 0000000..e8130e1[m
+Binary files /dev/null and b/supabase/example/prueba2.mp3 differ
+[1mdiff --git a/supabase/example/prueba3.mp3 b/supabase/example/prueba3.mp3[m
+[1mnew file mode 100644[m
+[1mindex 0000000..c8ba799[m
+Binary files /dev/null and b/supabase/example/prueba3.mp3 differ
+[1mdiff --git a/supabase/example/prueba4.mp3 b/supabase/example/prueba4.mp3[m
+[1mnew file mode 100644[m
+[1mindex 0000000..5b4d33d[m
+Binary files /dev/null and b/supabase/example/prueba4.mp3 differ
+[1mdiff --git a/supabase/example/prueba5.mp3 b/supabase/example/prueba5.mp3[m
+[1mnew file mode 100644[m
+[1mindex 0000000..0ec88a2[m
+Binary files /dev/null and b/supabase/example/prueba5.mp3 differ
+[1mdiff --git a/supabase/functions/process-audio/.npmrc b/supabase/functions/process-audio/.npmrc[m
+[1mnew file mode 100644[m
+[1mindex 0000000..48c6388[m
+[1m--- /dev/null[m
+[1m+++ b/supabase/functions/process-audio/.npmrc[m
+[36m@@ -0,0 +1,3 @@[m
+[32m+[m[32m# Configuration for private npm package dependencies[m
+[32m+[m[32m# For more information on using private registries with Edge Functions, see:[m
+[32m+[m[32m# https://supabase.com/docs/guides/functions/import-maps#importing-from-private-registries[m
+[1mdiff --git a/supabase/functions/process-audio/deno.json b/supabase/functions/process-audio/deno.json[m
+[1mnew file mode 100644[m
+[1mindex 0000000..e3995b3[m
+[1m--- /dev/null[m
+[1m+++ b/supabase/functions/process-audio/deno.json[m
+[36m@@ -0,0 +1,33 @@[m
+[32m+[m[32m{[m
+[32m+[m[32m  "intent": "add_to_cart",[m
+[32m+[m[32m  "confidence": 0.9,[m
+[32m+[m[32m  "raw_transcription": "Quiero dos cocas y un pan.",[m
+[32m+[m[32m  "voice_prompt_output": {[m
+[32m+[m[32m    "orden": [[m
+[32m+[m[32m      { "producto": "Coca-Cola", "cantidad": 2, "unidad": "piezas", "nota_original": "dos cocas" },[m
+[32m+[m[32m      { "producto": "pan", "cantidad": 1, "unidad": "piezas", "nota_original": "un pan" }[m
+[32m+[m[32m    ],[m
+[32m+[m[32m    "confianza": "alta",[m
+[32m+[m[32m    "duda_posible": null[m
+[32m+[m[32m  },[m
+[32m+[m[32m  "normalized_order": {[m
+[32m+[m[32m    "items": [[m
+[32m+[m[32m      {[m
+[32m+[m[32m        "product_id": "54d95766-cd38-4127-a3e9-9f6ea....",[m[41m [m
+[32m+[m[32m        "product_name": "Paquete Refresco Cola (6p2)",[m
+[32m+[m[32m        "quantity": 2,[m
+[32m+[m[32m        "unit_price": 150.0,[m
+[32m+[m[32m        "subtotal": 300.0[m
+[32m+[m[32m      }[m
+[32m+[m[32m    ],[m
+[32m+[m[32m    "order_total": 300.0,[m
+[32m+[m[32m    "currency": "MXN"[m
+[32m+[m[32m  },[m
+[32m+[m[32m  "metadata": {[m
+[32m+[m[32m    "input_method": "voice",[m
+[32m+[m[32m    "language": "es-MX",[m
+[32m+[m[32m    "processed_at": "2026-01-27T05:38:18.180Z",[m
+[32m+[m[32m    "model": "gpt-4o-mini"[m
+[32m+[m[32m  },[m
+[32m+[m[32m  "order_id": "uuid..."[m
+[32m+[m[32m}[m
+[1mdiff --git a/supabase/functions/process-audio/index.ts b/supabase/functions/process-audio/index.ts[m
+[1mnew file mode 100644[m
+[1mindex 0000000..397cfa2[m
+[1m--- /dev/null[m
+[1m+++ b/supabase/functions/process-audio/index.ts[m
+[36m@@ -0,0 +1,372 @@[m
+[32m+[m[32mimport OpenAI from "https://esm.sh/openai@4.28.0"[m
+[32m+[m[32mimport { createClient } from "https://esm.sh/@supabase/supabase-js@2"[m
+[32m+[m
+[32m+[m[32mtype CartItem = {[m
+[32m+[m[32m  product_id: string        // uuid (para response)[m
+[32m+[m[32m  db_product_id: number     // bigint (para insertar)[m
+[32m+[m[32m  product_name: string[m
+[32m+[m[32m  quantity: number[m
+[32m+[m[32m  unit_price: number[m
+[32m+[m[32m  subtotal: number[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mtype VoicePromptOutput = {[m
+[32m+[m[32m  orden: Array<{[m
+[32m+[m[32m    producto: string[m
+[32m+[m[32m    cantidad: number[m
+[32m+[m[32m    unidad: string[m
+[32m+[m[32m    nota_original: string[m
+[32m+[m[32m  }>[m
+[32m+[m[32m  confianza: "baja" | "media" | "alta"[m
+[32m+[m[32m  duda_posible: string | null[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mtype AudioToCartResponse = {[m
+[32m+[m[32m  intent: "add_to_cart" | "clarification_required"[m
+[32m+[m[32m  confidence: number[m
+[32m+[m[32m  raw_transcription: string[m
+[32m+[m[32m  voice_prompt_output: VoicePromptOutput[m
+[32m+[m[32m  normalized_order: {[m
+[32m+[m[32m    items: CartItem[][m
+[32m+[m[32m    order_total: number[m
+[32m+[m[32m    currency: "MXN"[m
+[32m+[m[32m  }[m
+[32m+[m[32m  metadata: {[m
+[32m+[m[32m    input_method: "voice"[m
+[32m+[m[32m    language: "es-MX"[m
+[32m+[m[32m    processed_at: string[m
+[32m+[m[32m    model: string[m
+[32m+[m[32m  }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mtype DBProduct = {[m
+[32m+[m[32m  id: number        // int8[m
+[32m+[m[32m  productor_id: string // uuid[m
+[32m+[m[32m  nombre: string[m
+[32m+[m[32m  precio: number[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mconst MODEL_CHAT = "gpt-4o-mini"[m
+[32m+[m[32mconst MODEL_WHISPER = "whisper-1"[m
+[32m+[m
+[32m+[m[32mconst SYSTEM_PROMPT = `[m
+[32m+[m[32mROL:[m
+[32m+[m[32mEres un asistente experto en inventario para "Barrio-Crédito", una App B2B para tienditas en México. Tu trabajo es interpretar pedidos dictados por voz y convertirlos en datos estructurados.[m
+[32m+[m
+[32m+[m[32mOBJETIVO:[m
+[32m+[m[32mExtraer la intención de compra del usuario y formatearla estrictamente como un objeto JSON.[m
+[32m+[m
+[32m+[m[32mREGLAS DE FORMATO (CRÍTICO):[m
+[32m+[m[32mTu respuesta debe ser SOLO un objeto JSON válido. Nada de texto antes ni después.[m
+[32m+[m[32mNo uses Markdown (\`\`\`json). Solo el raw JSON.[m
+[32m+[m[32mSi el usuario menciona marcas coloquiales (ej. "Coca"), asocia con el nombre real del producto.[m
+[32m+[m[32mSi falta la cantidad, asume "1".[m
+[32m+[m
+[32m+[m[32mESQUEMA JSON ESPERADO:[m
+[32m+[m[32m{[m
+[32m+[m[32m  "orden": [[m
+[32m+[m[32m    {[m
+[32m+[m[32m      "producto": "string (nombre estandarizado)",[m
+[32m+[m[32m      "cantidad": integer,[m
+[32m+[m[32m      "unidad": "string (cajas, piezas, paquetes)",[m
+[32m+[m[32m      "nota_original": "string (lo que dijo exactamente el usuario para referencia)"[m
+[32m+[m[32m    }[m
+[32m+[m[32m  ],[m
+[32m+[m[32m  "confianza": "baja" | "media" | "alta",[m
+[32m+[m[32m  "duda_posible": "string o null (si algo no se entendió bien)"[m
+[32m+[m[32m}[m
+[32m+[m[32m`.trim()[m
+[32m+[m
+[32m+[m[32mfunction nowISO() {[m
+[32m+[m[32m  return new Date().toISOString()[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction normalize(s: string) {[m
+[32m+[m[32m  return s[m
+[32m+[m[32m    .toLowerCase()[m
+[32m+[m[32m    .trim()[m
+[32m+[m[32m    .normalize("NFD")[m
+[32m+[m[32m    .replace(/[\u0300-\u036f]/g, "")[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction confidenceToNumber(c: VoicePromptOutput["confianza"]): number {[m
+[32m+[m[32m  if (c === "alta") return 0.9[m
+[32m+[m[32m  if (c === "media") return 0.7[m
+[32m+[m[32m  return 0.5[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction safeJsonParse<T>(text: string): T | null {[m
+[32m+[m[32m  try {[m
+[32m+[m[32m    return JSON.parse(text) as T[m
+[32m+[m[32m  } catch {[m
+[32m+[m[32m    return null[m
+[32m+[m[32m  }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction tokenize(s: string) {[m
+[32m+[m[32m  return normalize(s).split(/\s+/).filter(Boolean)[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction matchProduct(products: DBProduct[], spoken: string): DBProduct | null {[m
+[32m+[m[32m  const n = normalize(spoken)[m
+[32m+[m
+[32m+[m[32m  // 1) exact[m
+[32m+[m[32m  let p = products.find((x) => normalize(x.nombre) === n)[m
+[32m+[m[32m  if (p) return p[m
+[32m+[m
+[32m+[m[32m  // 2) contains directo[m
+[32m+[m[32m  p = products.find((x) => normalize(x.nombre).includes(n) || n.includes(normalize(x.nombre)))[m
+[32m+[m[32m  if (p) return p[m
+[32m+[m
+[32m+[m[32m  // 3) match por tokens (>=2 palabras en común)[m
+[32m+[m[32m  const tSpoken = new Set(tokenize(spoken))[m
+[32m+[m[32m  let best: { prod: DBProduct; score: number } | null = null[m
+[32m+[m
+[32m+[m[32m  for (const prod of products) {[m
+[32m+[m[32m    const tName = tokenize(prod.nombre)[m
+[32m+[m[32m    const score = tName.reduce((acc, w) => acc + (tSpoken.has(w) ? 1 : 0), 0)[m
+[32m+[m[32m    if (!best || score > best.score) best = { prod, score }[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  // mínimo 2 tokens compartidos para aceptar[m
+[32m+[m[32m  return best && best.score >= 2 ? best.prod : null[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mconst supabase = createClient([m
+[32m+[m[32m  Deno.env.get("SB_URL")!,[m
+[32m+[m[32m  Deno.env.get("SB_SERVICE_ROLE_KEY")![m
+[32m+[m[32m)[m
+[32m+[m
+[32m+[m[32masync function loadProducts(): Promise<DBProduct[]> {[m
+[32m+[m[32m  const { data, error } = await supabase[m
+[32m+[m[32m    .from("products")[m
+[32m+[m[32m    .select("id, productor_id, nombre, precio")[m
+[32m+[m
+[32m+[m[32m  if (error) throw error[m
+[32m+[m[32m  return (data ?? []) as DBProduct[][m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mDeno.serve(async (req) => {[m
+[32m+[m[32m  // LOGS DE CONEXION PARA DEBUG (mantener comentados en PR)[m
+[32m+[m[32m  // console.log("SB_URL:", Deno.env.get("SB_URL"))[m
+[32m+[m[32m  // console.log("SB_SERVICE_ROLE_KEY prefix:", (Deno.env.get("SB_SERVICE_ROLE_KEY") ?? "").slice(0, 10))[m
+[32m+[m
+[32m+[m[32m  try {[m
+[32m+[m[32m    if (req.method !== "POST") {[m
+[32m+[m[32m      return new Response(JSON.stringify({ error: "Use POST" }), { status: 405 })[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    const apiKey = Deno.env.get("OPENAI_API_KEY")[m
+[32m+[m[32m    if (!apiKey) {[m
+[32m+[m[32m      return new Response(JSON.stringify({ error: "OPENAI_API_KEY not found" }), { status: 500 })[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    // Para demo/local: comprador_id fijo (uuid)[m
+[32m+[m[32m    const comprador_id = Deno.env.get("DEMO_COMPRADOR_ID")[m
+[32m+[m[32m    if (!comprador_id) {[m
+[32m+[m[32m      return new Response([m
+[32m+[m[32m        JSON.stringify({ error: "Missing DEMO_COMPRADOR_ID env var (must be a UUID from profiles.id)" }),[m
+[32m+[m[32m        { status: 500, headers: { "Content-Type": "application/json" } }[m
+[32m+[m[32m      )[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    // 1) Recibir audio[m
+[32m+[m[32m    const formData = await req.formData()[m
+[32m+[m[32m    const audioFile = formData.get("audio") as File | null[m
+[32m+[m[32m    if (!audioFile) {[m
+[32m+[m[32m      return new Response([m
+[32m+[m[32m        JSON.stringify({ error: "No audio file provided (field name must be: audio)" }),[m
+[32m+[m[32m        { status: 400, headers: { "Content-Type": "application/json" } }[m
+[32m+[m[32m      )[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    const openai = new OpenAI({ apiKey })[m
+[32m+[m
+[32m+[m[32m    // 2) Whisper[m
+[32m+[m[32m    const whisper = await openai.audio.transcriptions.create({[m
+[32m+[m[32m      file: audioFile,[m
+[32m+[m[32m      model: MODEL_WHISPER,[m
+[32m+[m[32m      language: "es",[m
+[32m+[m[32m    })[m
+[32m+[m
+[32m+[m[32m    const raw_transcription = (whisper.text ?? "").trim()[m
+[32m+[m[32m    if (!raw_transcription) {[m
+[32m+[m[32m      return new Response(JSON.stringify({ error: "Empty transcription" }), {[m
+[32m+[m[32m        status: 400,[m
+[32m+[m[32m        headers: { "Content-Type": "application/json" },[m
+[32m+[m[32m      })[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    // 3) GPT -> VoicePromptOutput[m
+[32m+[m[32m    const completion = await openai.chat.completions.create({[m
+[32m+[m[32m      model: MODEL_CHAT,[m
+[32m+[m[32m      temperature: 0.2,[m
+[32m+[m[32m      messages: [[m
+[32m+[m[32m        { role: "system", content: SYSTEM_PROMPT },[m
+[32m+[m[32m        { role: "user", content: raw_transcription },[m
+[32m+[m[32m      ],[m
+[32m+[m[32m      response_format: { type: "json_object" },[m
+[32m+[m[32m    })[m
+[32m+[m
+[32m+[m[32m    const jsonText = completion.choices[0]?.message?.content ?? "{}"[m
+[32m+[m[32m    const voiceOut = safeJsonParse<VoicePromptOutput>(jsonText)[m
+[32m+[m
+[32m+[m[32m    if (!voiceOut || !Array.isArray(voiceOut.orden)) {[m
+[32m+[m[32m      return new Response([m
+[32m+[m[32m        JSON.stringify({ error: "Prompt output invalid", raw_output: jsonText }),[m
+[32m+[m[32m        { status: 500, headers: { "Content-Type": "application/json" } }[m
+[32m+[m[32m      )[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    // 4) Load products UNA vez[m
+[32m+[m[32m    const products = await loadProducts()[m
+[32m+[m
+[32m+[m[32m    // 5) Normalizar items usando schema real de products[m
+[32m+[m[32m    const items: CartItem[] = [][m
+[32m+[m[32m    for (const o of voiceOut.orden) {[m
+[32m+[m[32m      const prodName = String(o.producto ?? "")[m
+[32m+[m[32m      const qty = Number(o.cantidad ?? 1)[m
+[32m+[m
+[32m+[m[32m      if (!prodName) continue[m
+[32m+[m[32m      const quantity = Number.isFinite(qty) && qty > 0 ? qty : 1[m
+[32m+[m
+[32m+[m[32m      const prod = matchProduct(products, prodName)[m
+[32m+[m[32m      if (!prod) continue[m
+[32m+[m
+[32m+[m[32m      const unit_price = Number(prod.precio)[m
+[32m+[m[32m      const subtotal = Number((unit_price * quantity).toFixed(2))[m
+[32m+[m
+[32m+[m[32m      items.push({[m
+[32m+[m[32m        product_id: prod.productor_id,   // uuid para response[m
+[32m+[m[32m        db_product_id: Number(prod.id),  // bigint para order_items (interno)[m
+[32m+[m[32m        product_name: prod.nombre,[m
+[32m+[m[32m        quantity,[m
+[32m+[m[32m        unit_price,[m
+[32m+[m[32m        subtotal,[m
+[32m+[m[32m      })[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    const order_total = Number(items.reduce((acc, i) => acc + i.subtotal, 0).toFixed(2))[m
+[32m+[m
+[32m+[m[32m    const confidence = confidenceToNumber(voiceOut.confianza)[m
+[32m+[m[32m    const intent: AudioToCartResponse["intent"] =[m
+[32m+[m[32m      items.length === 0 || voiceOut.duda_posible ? "clarification_required" : "add_to_cart"[m
+[32m+[m
+[32m+[m[32m    const response: AudioToCartResponse = {[m
+[32m+[m[32m      intent,[m
+[32m+[m[32m      confidence,[m
+[32m+[m[32m      raw_transcription,[m
+[32m+[m[32m      voice_prompt_output: voiceOut,[m
+[32m+[m[32m      normalized_order: {[m
+[32m+[m[32m        items,[m
+[32m+[m[32m        order_total,[m
+[32m+[m[32m        currency: "MXN",[m
+[32m+[m[32m      },[m
+[32m+[m[32m      metadata: {[m
+[32m+[m[32m        input_method: "voice",[m
+[32m+[m[32m        language: "es-MX",[m
+[32m+[m[32m        processed_at: nowISO(),[m
+[32m+[m[32m        model: MODEL_CHAT,[m
+[32m+[m[32m      },[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    // ✅ Si no hay items o hay duda, NO creamos orden (evita basura en BD)[m
+[32m+[m[32m    if (intent === "clarification_required") {[m
+[32m+[m[32m      const responseItems = items.map(({ db_product_id, ...rest }) => rest)[m
+[32m+[m[32m      return new Response([m
+[32m+[m[32m        JSON.stringify({[m
+[32m+[m[32m          ...response,[m
+[32m+[m[32m          normalized_order: { ...response.normalized_order, items: responseItems },[m
+[32m+[m[32m        }),[m
+[32m+[m[32m        { headers: { "Content-Type": "application/json" } }[m
+[32m+[m[32m      )[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    // 6) INSERT a orders (schema real)[m
+[32m+[m[32m    const { data: order, error: orderError } = await supabase[m
+[32m+[m[32m      .from("orders")[m
+[32m+[m[32m      .insert({[m
+[32m+[m[32m        comprador_id,[m
+[32m+[m[32m        total: response.normalized_order.order_total,[m
+[32m+[m[32m        status: "pendiente",[m
+[32m+[m[32m        detalles_ia: response, // guarda evidencia completa (incluye db_product_id)[m
+[32m+[m[32m      })[m
+[32m+[m[32m      .select("id")[m
+[32m+[m[32m      .single()[m
+[32m+[m
+[32m+[m[32m    if (orderError) {[m
+[32m+[m[32m      console.error("orders insert error:", orderError)[m
+[32m+[m[32m      return new Response(JSON.stringify({ error: "orders insert failed", orderError }), {[m
+[32m+[m[32m        status: 500,[m
+[32m+[m[32m        headers: { "Content-Type": "application/json" },[m
+[32m+[m[32m      })[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    const order_id = order.id as string[m
+[32m+[m
+[32m+[m[32m    // 7) INSERT a order_items (schema real)[m
+[32m+[m[32m    const { error: itemsError } = await supabase[m
+[32m+[m[32m      .from("order_items")[m
+[32m+[m[32m      .insert([m
+[32m+[m[32m        items.map((i) => ({[m
+[32m+[m[32m          order_id,[m
+[32m+[m[32m          product_id: i.db_product_id,     // BIGINT[m
+[32m+[m[32m          cantidad: i.quantity,            // int4[m
+[32m+[m[32m          precio_unitario: i.unit_price,   // numeric[m
+[32m+[m[32m        }))[m
+[32m+[m[32m      )[m
+[32m+[m
+[32m+[m[32m    if (itemsError) {[m
+[32m+[m[32m      console.error("order_items insert error:", itemsError)[m
+[32m+[m[32m      return new Response(JSON.stringify({ error: "order_items insert failed", itemsError }), {[m
+[32m+[m[32m        status: 500,[m
+[32m+[m[32m        headers: { "Content-Type": "application/json" },[m
+[32m+[m[32m      })[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    // 8) Decrementar stock en products[m
+[32m+[m[32m    for (const i of items) {[m
+[32m+[m[32m      // i.db_product_id es products.id (int8)[m
+[32m+[m[32m      const { error: stockErr } = await supabase.rpc("decrement_stock", {[m
+[32m+[m[32m        p_product_id: i.db_product_id,[m
+[32m+[m[32m        p_qty: i.quantity,[m
+[32m+[m[32m      })[m
+[32m+[m
+[32m+[m[32m      if (stockErr) {[m
+[32m+[m[32m        console.error("stock update failed:", stockErr)[m
+[32m+[m[32m        // puedes decidir si: (a) fallar todo o (b) solo loggear[m
+[32m+[m[32m        // aquí recomiendo fallar para mantener consistencia:[m
+[32m+[m[32m        return new Response(JSON.stringify({ error: "stock update failed", stockErr }), {[m
+[32m+[m[32m          status: 500,[m
+[32m+[m[32m          headers: { "Content-Type": "application/json" },[m
+[32m+[m[32m        })[m
+[32m+[m[32m      }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m
+[32m+[m[32m    // ✅ Respuesta limpia (sin db_product_id)[m
+[32m+[m[32m    const responseItems = items.map(({ db_product_id, ...rest }) => rest)[m
+[32m+[m
+[32m+[m[32m    return new Response([m
+[32m+[m[32m      JSON.stringify({[m
+[32m+[m[32m        ...response,[m
+[32m+[m[32m        normalized_order: { ...response.normalized_order, items: responseItems },[m
+[32m+[m[32m        order_id,[m
+[32m+[m[32m      }),[m
+[32m+[m[32m      { headers: { "Content-Type": "application/json" } }[m
+[32m+[m[32m    )[m
+[32m+[m[32m  } catch (err) {[m
+[32m+[m[32m    console.error("process-audio error:", err)[m
+[32m+[m
+[32m+[m[32m    const details =[m
+[32m+[m[32m      err instanceof Error[m
+[32m+[m[32m        ? { message: err.message, stack: err.stack }[m
+[32m+[m[32m        : err[m
+[32m+[m
+[32m+[m[32m    return new Response([m
+[32m+[m[32m      JSON.stringify({ error: "Internal error", details }),[m
+[32m+[m[32m      { status: 500, headers: { "Content-Type": "application/json" } }[m
+[32m+[m[32m    )[m
+[32m+[m[32m  }[m
+[32m+[m[32m})[m
+[32m+[m
+[1mdiff --git a/supabase/snippets/Untitled query 449.sql b/supabase/snippets/Untitled query 449.sql[m
+[1mnew file mode 100644[m
+[1mindex 0000000..6227864[m
+[1m--- /dev/null[m
+[1m+++ b/supabase/snippets/Untitled query 449.sql[m	
+[36m@@ -0,0 +1,31 @@[m
+[32m+[m[32mcreate table if not exists products ([m
+[32m+[m[32m  id text primary key,[m
+[32m+[m[32m  name text not null,[m
+[32m+[m[32m  price numeric not null,[m
+[32m+[m[32m  store_id text not null,[m
+[32m+[m[32m  synonyms text[][m
+[32m+[m[32m);[m
+[32m+[m
+[32m+[m[32mcreate table if not exists orders ([m
+[32m+[m[32m  id uuid primary key default gen_random_uuid(),[m
+[32m+[m[32m  user_id text not null,[m
+[32m+[m[32m  store_id text not null,[m
+[32m+[m[32m  total numeric not null,[m
+[32m+[m[32m  currency text not null default 'MXN',[m
+[32m+[m[32m  created_at timestamptz not null default now()[m
+[32m+[m[32m);[m
+[32m+[m
+[32m+[m[32mcreate table if not exists order_items ([m
+[32m+[m[32m  id uuid primary key default gen_random_uuid(),[m
+[32m+[m[32m  order_id uuid references orders(id) on delete cascade,[m
+[32m+[m[32m  product_id text references products(id),[m
+[32m+[m[32m  quantity int not null,[m
+[32m+[m[32m  unit_price numeric not null,[m
+[32m+[m[32m  subtotal numeric not null[m
+[32m+[m[32m);[m
+[32m+[m
+[32m+[m[32minsert into products (id, name, price, store_id, synonyms) values[m
+[32m+[m[32m('prod_coca_600','Coca-Cola 600ml',18,'tiendita_001',ARRAY['coca','coca cola','coca-cola','refresco','cocas']),[m
+[32m+[m[32m('prod_pan_blanco','Pan blanco',8,'tiendita_001',ARRAY['pan','bolillo','pan blanco'])[m
+[32m+[m[32mon conflict (id) do nothing;[m
+[32m+[m

@@ -1,0 +1,33 @@
+{
+  "intent": "add_to_cart",
+  "confidence": 0.9,
+  "raw_transcription": "Quiero dos cocas y un pan.",
+  "voice_prompt_output": {
+    "orden": [
+      { "producto": "Coca-Cola", "cantidad": 2, "unidad": "piezas", "nota_original": "dos cocas" },
+      { "producto": "pan", "cantidad": 1, "unidad": "piezas", "nota_original": "un pan" }
+    ],
+    "confianza": "alta",
+    "duda_posible": null
+  },
+  "normalized_order": {
+    "items": [
+      {
+        "product_id": "54d95766-cd38-4127-a3e9-9f6ea....", 
+        "product_name": "Paquete Refresco Cola (6p2)",
+        "quantity": 2,
+        "unit_price": 150.0,
+        "subtotal": 300.0
+      }
+    ],
+    "order_total": 300.0,
+    "currency": "MXN"
+  },
+  "metadata": {
+    "input_method": "voice",
+    "language": "es-MX",
+    "processed_at": "2026-01-27T05:38:18.180Z",
+    "model": "gpt-4o-mini"
+  },
+  "order_id": "uuid..."
+}
