@@ -1,45 +1,16 @@
-# A TU NOMBRE
+# React + Vite
 
-Si el dinero me miran gastar, es que así me acostumbré a ganar
-Y si a diario me miran tomar, es que no te he podido olvidar
-A tu nombre otra vez vo'a brindar, las pacas las voy a duplicar
-Con las morras billetes gastar, con morras me voy a enfiestar
-Entre drogas, mujeres, las armas, el dinero, me perdí, el exceso
-Es todo lo que tú me causaste por haberme quitado tus besos
-Mi amor, ya dime que sí me extrañas y que no anda con ese pendejo
-Que echas de menos mi habitación y todas las noches de desvelo
-Llegan morritas para no estarte pensando
-Y entre más tomo, más te sigo recordando
-Mami, en el BM tu perfume está regado
-Te llamo y llamo, pero no me has contestado
-Tal vez no quieres a alguien lleno de hipocresía
-Todo lo bueno y malo que hacía te lo decía
-Quieres un niño bueno, romántico y poesía
-Y yo que soy un vago que por tus besos moría
-Y tomo y tomo mientras pa' no recordarte
-Otro Buchanan's abro para no pensarte
-Estaba a punto de salir a buscarte
-Pero si eres feliz tengo que respetarte
-Si el dinero me miran gastar, es que así me acostumbré a ganar
-Y si a diario me miran tomar, es que no te he podido olvidar
-A tu nombre otra vez vo'a brindar, las pacas las voy a duplicar
-Con las morras billetes gastar, con morras me voy a enfiestar
-Entre drogas, mujeres, las armas, el dinero, me perdí, el exceso
-Es todo lo que tú me causaste por haberme quitado tus besos
-Mi amor, ya dime que sí me extrañas y que no andas con ese pendejo
-Que echas de menos mi habitación y todas las noches de desvelo
-Llegan morritas para no estarte pensando
-Y entre más tomo, más te sigo recordando
-Mami, en el BM tu perfume está regado
-Te llamo y llamo, pero no me has contestado
-Tal vez no quieres a alguien lleno de hipocresía
-Todo lo bueno y malo que hacía, te lo decía
-Quieres un niño bueno, romántico y poesía
-Y yo que soy un vago que por tus besos moría
-Y tomo y tomo mientras pa' no recordarte
-Otro Buchanan's abro para no pensarte
-Estaba a punto de salir a buscarte
-Pero si eres feliz tengo que respetarte
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+Currently, two official plugins are available:
 
-Camila regresa Camila
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [typescript-eslint](https://typescript-eslint.io) in your project.
