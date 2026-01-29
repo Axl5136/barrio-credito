@@ -146,19 +146,37 @@ async function loadProducts(): Promise<DBProduct[]> {
   return (data ?? []) as DBProduct[]
 }
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "http://localhost:5173",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+}
+
 Deno.serve(async (req) => {
   // LOGS DE CONEXION PARA DEBUG (mantener comentados en PR)
   // console.log("SB_URL:", Deno.env.get("SB_URL"))
   // console.log("SB_SERVICE_ROLE_KEY prefix:", (Deno.env.get("SB_SERVICE_ROLE_KEY") ?? "").slice(0, 10))
 
   try {
+    // ✅ Preflight CORS
+    if (req.method === "OPTIONS") {
+      return new Response("ok", { headers: corsHeaders })
+    }
+
+    // ✅ Aceptar solo POST
     if (req.method !== "POST") {
-      return new Response(JSON.stringify({ error: "Use POST" }), { status: 405 })
+      return new Response(JSON.stringify({ error: "Use POST" }), {
+        status: 405,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      })
     }
 
     const apiKey = Deno.env.get("OPENAI_API_KEY")
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "OPENAI_API_KEY not found" }), { status: 500 })
+      return new Response(JSON.stringify({ error: "OPENAI_API_KEY not found" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      })
     }
 
     // Para demo/local: comprador_id fijo (uuid)
@@ -166,7 +184,7 @@ Deno.serve(async (req) => {
     if (!comprador_id) {
       return new Response(
         JSON.stringify({ error: "Missing DEMO_COMPRADOR_ID env var (must be a UUID from profiles.id)" }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
       )
     }
 
@@ -176,7 +194,7 @@ Deno.serve(async (req) => {
     if (!audioFile) {
       return new Response(
         JSON.stringify({ error: "No audio file provided (field name must be: audio)" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       )
     }
 
@@ -193,7 +211,7 @@ Deno.serve(async (req) => {
     if (!raw_transcription) {
       return new Response(JSON.stringify({ error: "Empty transcription" }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       })
     }
 
@@ -214,7 +232,7 @@ Deno.serve(async (req) => {
     if (!voiceOut || !Array.isArray(voiceOut.orden)) {
       return new Response(
         JSON.stringify({ error: "Prompt output invalid", raw_output: jsonText }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
       )
     }
 
@@ -278,7 +296,7 @@ Deno.serve(async (req) => {
           ...response,
           normalized_order: { ...response.normalized_order, items: responseItems },
         }),
-        { headers: { "Content-Type": "application/json" } }
+        { headers: { "Content-Type": "application/json", ...corsHeaders } }
       )
     }
 
@@ -298,7 +316,7 @@ Deno.serve(async (req) => {
       console.error("orders insert error:", orderError)
       return new Response(JSON.stringify({ error: "orders insert failed", orderError }), {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       })
     }
 
@@ -320,13 +338,12 @@ Deno.serve(async (req) => {
       console.error("order_items insert error:", itemsError)
       return new Response(JSON.stringify({ error: "order_items insert failed", itemsError }), {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       })
     }
 
     // 8) Decrementar stock en products
     for (const i of items) {
-      // i.db_product_id es products.id (int8)
       const { error: stockErr } = await supabase.rpc("decrement_stock", {
         p_product_id: i.db_product_id,
         p_qty: i.quantity,
@@ -334,15 +351,12 @@ Deno.serve(async (req) => {
 
       if (stockErr) {
         console.error("stock update failed:", stockErr)
-        // puedes decidir si: (a) fallar todo o (b) solo loggear
-        // aquí recomiendo fallar para mantener consistencia:
         return new Response(JSON.stringify({ error: "stock update failed", stockErr }), {
           status: 500,
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...corsHeaders },
         })
       }
     }
-
 
     // ✅ Respuesta limpia (sin db_product_id)
     const responseItems = items.map(({ db_product_id, ...rest }) => rest)
@@ -353,20 +367,19 @@ Deno.serve(async (req) => {
         normalized_order: { ...response.normalized_order, items: responseItems },
         order_id,
       }),
-      { headers: { "Content-Type": "application/json" } }
+      { headers: { "Content-Type": "application/json", ...corsHeaders } }
     )
   } catch (err) {
     console.error("process-audio error:", err)
 
     const details =
-      err instanceof Error
-        ? { message: err.message, stack: err.stack }
-        : err
+      err instanceof Error ? { message: err.message, stack: err.stack } : err
 
-    return new Response(
-      JSON.stringify({ error: "Internal error", details }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    )
+    return new Response(JSON.stringify({ error: "Internal error", details }), {
+      status: 500,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    })
   }
 })
+
 

@@ -3,6 +3,8 @@ import { useAuth } from '../AuthContext';
 import { supabase } from '../services/supabase';
 import { ShoppingCart, Plus, Minus, Trash2, X, LogOut, Store, Mic } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
+import { useRef } from "react";
+
 
 import VoiceCartResults from './VoiceCartResults';
 
@@ -28,6 +30,18 @@ export default function TienditaDashboard() {
     const [detectedText, setDetectedText] = useState("");
     const [detectedCategories, setDetectedCategories] = useState([]);
     const [view, setView] = useState('store');
+    const [isProcessingVoice, setIsProcessingVoice] = useState(false);
+    const [voiceError, setVoiceError] = useState(null);
+    const [voiceResult, setVoiceResult] = useState(null);
+
+    const mediaRecorderRef = useRef(null);
+    const streamRef = useRef(null);
+    const chunksRef = useRef([]);
+
+    const [liveText, setLiveText] = useState(""); // lo que se ve mientras habla
+    const recognitionRef = useRef(null);
+
+
     
     useEffect(() => {
         cargarProductos();
@@ -38,14 +52,14 @@ export default function TienditaDashboard() {
             .on('postgres_changes', {
                 event: '*',
                 schema: 'public',
-                table: 'productos'
+                table: 'products'
             }, (payload) => {
                 cargarProductos();
                 if (payload.eventType === 'UPDATE' && payload.new) {
                     setCarrito(prevCarrito =>
                         prevCarrito.map(item =>
                             item.id === payload.new.id
-                                ? { ...item, cantidad: payload.new.cantidad }
+                                ? { ...item, stock: payload.new.stock }
                                 : item
                         ).filter(item => item.cantidad > 0)
                     );
@@ -62,7 +76,7 @@ export default function TienditaDashboard() {
 
     const cargarProductos = async () => {
         const { data } = await supabase
-            .from('productos')
+            .from('products')
             .select('*')
             .order('created_at', { ascending: false });
         setProductos(data || []);
@@ -72,7 +86,7 @@ export default function TienditaDashboard() {
         if (producto.cantidad === 0) return;
         const existe = carrito.find(item => item.id === producto.id);
         if (existe) {
-            if (existe.cantidadCarrito < producto.cantidad) {
+            if (existe.cantidadCarrito < producto.stock) {
                 setCarrito(carrito.map(item =>
                     item.id === producto.id
                         ? { ...item, cantidadCarrito: item.cantidadCarrito + 1 }
@@ -86,12 +100,53 @@ export default function TienditaDashboard() {
         }
     };
 
+    const addVoiceItemToCart = (voiceItem) => {
+        // voiceItem: { product_id, product_name, quantity, unit_price, subtotal }
+        const productId = Number(voiceItem.product_id);
+        const qty = Number(voiceItem.quantity ?? 1);
+
+        const producto = productos.find(p => Number(p.id) === productId);
+
+        if (!producto) {
+            alert(`No encontré el producto en catálogo: ${voiceItem.product_name} (id ${voiceItem.product_id})`);
+            return;
+        }
+
+        if (producto.stock === 0) {
+            alert(`Sin stock: ${producto.nombre}`);
+            return;
+        }
+
+        setCarrito(prev => {
+            const existe = prev.find(item => item.id === producto.id);
+            const actual = existe?.cantidadCarrito ?? 0;
+
+            const nuevaCantidad = Math.min(actual + qty, producto.stock);
+
+            if (nuevaCantidad === actual) {
+            alert(`No hay suficiente inventario para ${producto.nombre}`);
+            return prev;
+            }
+
+            if (existe) {
+            return prev.map(item =>
+                item.id === producto.id
+                ? { ...item, cantidadCarrito: nuevaCantidad }
+                : item
+            );
+            }
+
+            return [...prev, { ...producto, cantidadCarrito: nuevaCantidad }];
+        });
+        };
+
+
     const modificarCantidad = (id, cantidad) => {
         const producto = productos.find(p => p.id === id);
         if (!producto) return;
         if (cantidad === 0) {
             setCarrito(carrito.filter(item => item.id !== id));
-        } else if (cantidad > producto.cantidad) {
+        } else if (cantidad > producto.stock) {
             alert('No hay suficiente inventario disponible');
         } else {
             setCarrito(carrito.map(item =>
@@ -126,31 +181,192 @@ export default function TienditaDashboard() {
     };
 
     // Voice Interaction Handlers
-    const startListening = () => {
+    const pickMimeType = () => {
+        const types = [
+            "audio/webm;codecs=opus",
+            "audio/webm",
+            "audio/ogg;codecs=opus",
+            "audio/ogg",
+        ];
+        return types.find((t) => window.MediaRecorder?.isTypeSupported?.(t)) || "";
+    };
+
+
+    const startListening = async () => {
         setIsListening(true);
         setDetectedText("");
-        setDetectedCategories([]);
-        
-        // Simulate detection delay
-        setTimeout(() => {
-            setDetectedText("refresco, papas, pan");
-        }, 1500);
+        setLiveText("");
+        setVoiceError(null);
+
+        // ✅ inicia transcripción en vivo
+        const rec = startSpeechRecognition();
+        recognitionRef.current = rec;
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            streamRef.current = stream;
+
+            const mimeType = pickMimeType();
+            const mr = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+
+            chunksRef.current = [];
+
+            mr.ondataavailable = (e) => {
+            if (e.data.size > 0) chunksRef.current.push(e.data);
+            };
+
+            mr.start(250);
+            mediaRecorderRef.current = mr;
+        } catch (err) {
+            setVoiceError(err?.message || "No se pudo acceder al micrófono");
+            setIsListening(false);
+            try { recognitionRef.current?.stop(); } catch {}
+            recognitionRef.current = null;
+        }
     };
 
-    const confirmVoiceOrder = () => {
-        setIsListening(false);
-        // Parse the text into categories
-        const categories = detectedText.split(',').map(s => s.trim()).filter(Boolean);
-        setDetectedCategories(categories);
-        setView('voice-cart');
+
+    const confirmVoiceOrder = async () => {
+        setIsProcessingVoice(true);
+        setVoiceError(null);
+
+        try { recognitionRef.current?.stop(); } catch {}
+            recognitionRef.current = null;
+
+        try {
+            const mr = mediaRecorderRef.current;
+            if (!mr) throw new Error("No hay grabación activa");
+
+            const audioBlob = await new Promise((resolve) => {
+            mr.onstop = () => {
+                const blob = new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" });
+                resolve(blob);
+            };
+            mr.stop();
+            });
+
+            // apagar micrófono
+            streamRef.current?.getTracks().forEach((t) => t.stop());
+            streamRef.current = null;
+            mediaRecorderRef.current = null;
+
+            console.log("chunks:", chunksRef.current.length);
+            console.log("blob size:", audioBlob.size, "type:", audioBlob.type);
+
+            if (!audioBlob.size) {
+            throw new Error("No se grabó audio (blob vacío).");
+            }
+
+            const form = new FormData();
+            form.append("audio", audioBlob, "audio.webm");
+
+            // ✅ LOCAL: llama directo a la función local
+            const res = await fetch("http://127.0.0.1:54321/functions/v1/process-audio", {
+            method: "POST",
+            body: form,
+            });
+
+            const data = await res.json();
+            console.log("process-audio response:", data);
+
+            setVoiceResult(data);
+            setDetectedText(data.raw_transcription || "");
+
+            setTimeout(() => {
+            setIsListening(false);
+            // setView("voice-cart") si aplica
+            }, 1000);
+
+
+            if (data?.intent === "add_to_cart") {
+            setIsListening(false);
+            setView("voice-cart");
+            await cargarProductos();
+            } else {
+            setVoiceError(data?.voice_prompt_output?.duda_posible || "No entendí bien, repite porfa.");
+            }
+        } catch (err) {
+            console.log("confirmVoiceOrder error:", err);
+            setVoiceError(err?.message || String(err));
+        } finally {
+            setIsProcessingVoice(false);
+        }
     };
+
 
     const cancelVoiceOrder = () => {
+        try { recognitionRef.current?.stop(); } catch {}
+        recognitionRef.current = null;
+
+        try { mediaRecorderRef.current?.stop(); } catch {}
+        streamRef.current?.getTracks().forEach((t) => t.stop());
+
+        mediaRecorderRef.current = null;
+        streamRef.current = null;
+        chunksRef.current = [];
+
         setIsListening(false);
         setDetectedText("");
+        setLiveText("");
+        setVoiceError(null);
     };
 
+
+
+    const startSpeechRecognition = () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+        setVoiceError("Tu navegador no soporta transcripción en vivo (usa Chrome).");
+        return null;
+    }
+
+    const rec = new SR();
+    rec.lang = "es-MX";
+    rec.continuous = true;      // sigue escuchando
+    rec.interimResults = true;  // resultados parciales (live)
+    rec.maxAlternatives = 1;
+
+    rec.onresult = (event) => {
+        let interim = "";
+        let finalText = "";
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) finalText += transcript;
+        else interim += transcript;
+        }
+
+        // interim se actualiza rapidito, finalText se va acumulando
+        setLiveText((prev) => (finalText ? (prev + " " + finalText).trim() : prev));
+        if (interim) setLiveText((prev) => (prev.split("|||")[0] + "|||" + interim).trim());
+    };
+
+    rec.onerror = (e) => {
+        console.log("SpeechRecognition error:", e);
+        // no mates toda la UX, solo avisa
+    };
+
+    rec.onend = () => {
+        // a veces se corta solo; si seguimos en listening lo reiniciamos
+        if (isListening) {
+        try { rec.start(); } catch {}
+        }
+    };
+
+    try {
+        rec.start();
+    } catch (e) {
+        console.log("SpeechRecognition start failed:", e);
+    }
+
+    return rec;
+    };
+
+
+
+
     const totalCarrito = carrito.reduce((sum, item) => sum + (item.precio * item.cantidadCarrito), 0);
+    const [finalPart, interimPart] = (liveText || "").split("|||");
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-yellow-50 relative overflow-x-hidden">
@@ -259,12 +475,14 @@ export default function TienditaDashboard() {
                     </>
                 ) : (
                     // Voice Cart View Component
-                    <VoiceCartResults 
-                        detectedCategories={detectedCategories}
-                        productos={productos}
-                        onBack={() => setView('store')}
-                        onAddToCart={agregarAlCarrito}
+                    <VoiceCartResults
+                    voiceResult={voiceResult}
+                    voiceItems={voiceResult?.normalized_order?.items || []}
+                    onBack={() => setView("store")}
+                    onAddToCart={addVoiceItemToCart}
                     />
+
+
                 )}
             </main>
 
@@ -314,14 +532,30 @@ export default function TienditaDashboard() {
                             
                             <h3 className="text-2xl font-bold text-gray-800 mb-2">Te estoy escuchando...</h3>
                             <p className="text-gray-500 mb-6">Di los productos que quieres agregar al carrito.</p>
-                            
+
                             <div className="bg-gray-50 p-4 rounded-xl mb-6 min-h-[80px] flex items-center justify-center border border-gray-100">
-                                {detectedText ? (
-                                    <p className="text-xl font-medium text-gray-800 capitalize">{detectedText}</p>
-                                ) : (
-                                    <p className="text-gray-400 italic">Escuchando...</p>
-                                )}
+                            {finalPart || interimPart ? (
+                                <p className="text-xl font-medium text-gray-800">
+                                {finalPart && <span>{finalPart} </span>}
+                                {interimPart && <span className="text-gray-400">{interimPart}</span>}
+                                </p>
+                            ) : (
+                                <p className="text-gray-400 italic">Escuchando...</p>
+                            )}
                             </div>
+
+
+
+                                {voiceError && (
+                                    <p className="text-red-600 font-medium mb-4">{voiceError}</p>
+                                    )}
+
+                                    {voiceResult?.intent === "clarification_required" && (
+                                    <p className="text-orange-600 font-medium mb-4">
+                                        {voiceResult.voice_prompt_output?.duda_posible ?? "¿Puedes repetir el pedido?"}
+                                    </p>
+                                )}
+
                             
                             <div className="flex gap-3">
                                 <button 
@@ -332,10 +566,10 @@ export default function TienditaDashboard() {
                                 </button>
                                 <button 
                                     onClick={confirmVoiceOrder}
-                                    disabled={!detectedText}
+                                    disabled={isProcessingVoice}
                                     className="flex-1 py-3 px-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-bold hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-green-200"
                                 >
-                                    Confirmar
+                                    {isProcessingVoice ? "Procesando..." : "Confirmar"}
                                 </button>
                             </div>
                         </motion.div>
